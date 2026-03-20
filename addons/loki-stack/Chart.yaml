@@ -1,0 +1,15 @@
+apiVersion: v2
+name: loki-stack
+description: Loki stack collects Kubernetes logs using Loki and Promtail.
+type: application
+version: 2.10.2
+appVersion: v2.9.3
+kubeVersion: ">=1.19.0-0"
+home: https://github.com/grafana/helm-charts
+dependencies:
+  - name: loki
+    version: "6.24.0"
+    repository: https://grafana.github.io/helm-charts
+  - name: promtail
+    version: "6.16.6"
+    repository: https://grafana.github.io/helm-charts

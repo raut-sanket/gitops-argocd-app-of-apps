@@ -1,0 +1,58 @@
+nameOverride: indexer-backend
+namespace: suidex-indexer-backend
+
+
+# rollout:
+#   annotatelitmus: true
+
+
+image:
+  repository: asia-south1-docker.pkg.dev/suidex/suidex-backend/indexer-backend
+  tag: fd69c462
+
+configs:
+  NODE_ENV: production
+  REDIS_URL: redis://redis.redis.svc.cluster.local:6379
+  SUI_NETWORK: mainnet
+  PGSSLMODE: disable
+  SUI_RPC_URLS: https://fullnode.mainnet.sui.io:443,https://sui-rpc.publicnode.com
+  API_URL: https://suidex-api.suidex.org
+replicas: 1
+resources:
+  requests:
+    memory: 96Mi
+    cpu: 50m
+  limits:
+    memory: 256Mi
+    cpu: 300m
+# probes:
+#   livenessPath: /internal/alive
+#   readinessPath: /internal/ready
+#   liveness:
+#     initialDelaySeconds: 3
+#     periodSeconds: 3
+#   readiness:
+#     initialDelaySeconds: 5
+#     periodSeconds: 5
+
+# autoscaling:
+#   minReplicas: 1
+#   maxReplicas: 2
+#   targetCPUUtilizationPercentage: 70
+
+secrets:
+  secretStore: suidex-store
+  key: suidex-indexer-backend
+  data:
+    - name: DATABASE_URL
+      property: dburl
+    - name: PACKAGE_ID
+      property: packageid
+
+ingress:
+  enabled: false
+  host: suidex-api-backend.suidex.org
+
+prometheus: 
+  enabled: false
+

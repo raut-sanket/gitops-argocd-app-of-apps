@@ -1,0 +1,144 @@
+{{- if .Values.statefulset }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.statefulset.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- toYaml .Values.statefulset.labels  | nindent 4 }}
+spec:
+  serviceName: {{ .Values.service.name }}
+  selector:
+    matchLabels:
+      {{- toYaml .Values.statefulset.labels  | nindent 6 }}
+  replicas:  {{ .Values.statefulset.replicas }}
+  {{- if .Values.statefulset.strategy }}
+  updateStrategy:
+{{ toYaml .Values.statefulset.strategy | indent 4 }}
+  template:
+    metadata:
+      {{- with .Values.statefulset.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- toYaml .Values.statefulset.labels  | nindent 8 }}
+    spec:
+      {{- if .Values.statefulset.affinity }}
+      affinity:
+        {{- if .Values.statefulset.affinity.nodeAffinity }}
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.statefulset.affinity.nodeAffinity.key }}
+                operator: In
+                values:
+                - {{ .Values.statefulset.affinity.nodeAffinity.value }}
+        {{- end }}
+        {{- if .Values.statefulset.affinity.podAntiAffinity }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                  - {{ include "app.name" . }}
+              topologyKey:  {{ .Values.statefulset.affinity.podAntiAffinity.topologyKey }}
+            weight: {{ .Values.statefulset.affinity.podAntiAffinity.weight }}
+        {{- end }}
+        {{- if .Values.statefulset.affinity.key }}
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.statefulset.affinity.key }}
+                operator: In
+                values:
+                - {{ .Values.statefulset.affinity.value }}
+      tolerations:
+        - effect: NoSchedule
+          key: {{ .Values.statefulset.affinity.key }}
+          operator: Equal
+          value: {{ .Values.statefulset.affinity.value }}
+      {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.statefulset.name }} 
+          image: {{ .Values.statefulset.image.repository }}:{{ .Values.statefulset.image.tag }}
+          imagePullPolicy: {{ .Values.statefulset.image.pullPolicy }}
+          {{- if .Values.statefulset.workDir }}
+          workingDir: {{ .Values.statefulset.workDir }}
+          {{- end }}
+          {{- if .Values.statefulset.command }}
+          command:
+          {{- range .Values.statefulset.command }}
+            - {{ . | quote }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.statefulset.args }}
+          args:
+          {{- range .Values.statefulset.args }}
+            - {{ . | quote }}
+          {{- end }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.statefulset.containerPort }}
+              name: psql
+          envFrom:
+          - configMapRef:
+              name: {{ include "app.name" . }}-config
+          {{- if .Values.secrets }}
+          - secretRef:
+              name: {{ include "app.name" . }}-secret
+          {{- end }}
+
+          {{- with .Values.statefulset.resources }}
+          resources:
+{{ toYaml . | indent 12 }}
+          {{- end }}
+
+          {{- if .Values.statefulset.probes }}
+          {{- if .Values.statefulset.probes.liveness }}
+          livenessProbe:
+            exec:
+              command:
+                {{- range .Values.statefulset.probes.livenessCommand }}
+                - {{ . | quote }}
+                {{- end }}
+{{ toYaml .Values.statefulset.probes.liveness | indent 12 }}
+          {{- end }}
+          {{- if .Values.statefulset.probes.readiness }}
+          readinessProbe:
+            exec:
+              command:
+                {{- range .Values.statefulset.probes.readinessCommand }}
+                - {{ . | quote }}
+                {{- end }}
+{{ toYaml .Values.statefulset.probes.readiness | indent 12 }}
+          {{- end }}
+          {{- end }}
+
+          {{- if .Values.statefulset.volumes }}
+          volumeMounts:
+          - mountPath: {{ .Values.statefulset.volumes.path }}
+            name: data
+            subPath: {{ .Values.statefulset.volumes.subPath }}
+          {{- end }}
+
+
+  {{- if .Values.statefulset.volumes }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ default "standard" .Values.statefulset.volumes.storageClass }}
+      resources:
+        requests:
+          storage: {{ .Values.statefulset.volumes.storage }}
+  {{- end }}
+{{- end }}
+{{- end }}

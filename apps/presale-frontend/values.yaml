@@ -1,0 +1,55 @@
+nameOverride: presale-frontend
+namespace: presale-prod
+
+
+# rollout:
+#   annotatelitmus: true
+
+service:
+  port: 80
+  containerPort: 80
+
+image:
+  repository: us-east4-docker.pkg.dev/suidex/suidex/presale-frontend
+  tag: ce2502bf
+configs:
+  # API Configuration
+  VITE_API_URL: "https://api.suidex.org/api/v1"
+  VITE_SUI_NETWORK: mainnet
+  VITE_EXPLORER_URL: https://mainnet.suivision.xyz
+  VITE_WUSDC_TYPE: "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC"
+  VITE_DEV_WALLET_ADDRESS: "0x4e95b4168f2529bd00f3b1b7030ec692c26f5fd05330ac75c4d5d87e5bde7af1"
+
+
+replicas: 1
+resources:
+  requests:
+    memory: 32Mi
+    cpu: 10m
+  limits:
+    memory: 128Mi
+    cpu: 100m
+# probes:
+#   livenessPath: /internal/alive
+#   readinessPath: /internal/ready
+#   liveness:
+#     initialDelaySeconds: 3
+#     periodSeconds: 3
+#   readiness:
+#     initialDelaySeconds: 5
+#     periodSeconds: 5
+
+
+# autoscaling:
+#   minReplicas: 1
+#   maxReplicas: 6
+#   targetCPUUtilizationPercentage: 70
+
+
+ingress:
+  enabled: true
+  host: presale.suidex.org
+
+prometheus: 
+  enabled: false
+

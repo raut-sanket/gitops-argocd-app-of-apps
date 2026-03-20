@@ -1,0 +1,30 @@
+external-secrets:
+  serviceAccount:
+    annotations:
+      iam.gke.io/gcp-service-account: external-secrets-sa-suidex-iam@suidex.iam.gserviceaccount.com
+
+  resources:
+    requests:
+      cpu: 5m
+      memory: 48Mi
+    limits:
+      cpu: 50m
+      memory: 96Mi
+
+  webhook:
+    resources:
+      requests:
+        cpu: 5m
+        memory: 32Mi
+      limits:
+        cpu: 50m
+        memory: 64Mi
+
+  certController:
+    resources:
+      requests:
+        cpu: 5m
+        memory: 32Mi
+      limits:
+        cpu: 50m
+        memory: 64Mi

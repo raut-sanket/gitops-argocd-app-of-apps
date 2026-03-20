@@ -1,0 +1,51 @@
+namespace: postgres
+
+configs:
+  POSTGRES_DB: suidex
+  POSTGRES_USER: suidex
+
+service:
+  name: suidex-db
+  port: 5432
+
+statefulset:
+  name: suidex-db
+  image:
+    repository: timescale/timescaledb
+    tag: latest-pg16
+    pullPolicy: IfNotPresent
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  labels:
+    app: suidex-db
+  podAnnotations: {}
+  containerPort: 5432
+  resources:
+    requests:
+      memory: "768Mi"
+      cpu: "250m"
+    limits:
+      memory: "2Gi"
+      cpu: "1"
+  probes:
+    readinessCommand: ["pg_isready", "-U", "suidex"]
+    readiness:
+      initialDelaySeconds: 5
+      periodSeconds: 5
+  volumes:
+    path: "/var/lib/postgresql/data"
+    storage: "10Gi"
+    subPath: "db0"
+  args:
+    - "-c"
+    - "max_connections=100"
+    - "-c"
+    - "shared_buffers=256MB"
+  
+secrets:
+  secretStore: suidex-store
+  key: suidex-postgres-secret
+  data:
+    - name: POSTGRES_PASSWORD
+      property: pgPassword

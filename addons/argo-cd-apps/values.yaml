@@ -1,0 +1,10 @@
+defaults:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  source:
+    repoURL: git@gitlab.com:suidex/argocd.git
+    targetRevision: HEAD
+
+apps: []
+addons: []

@@ -1,0 +1,146 @@
+# loki: https://github.com/grafana/loki/blob/main/production/helm/loki/single-binary-values.yaml
+
+loki:
+  enabled: true
+  # TODO: Deploy in cluster mode, after migrating to new cluster
+  # We need 3 nodes dedicated for apps deployment
+  deploymentMode: SingleBinary
+  singleBinary:
+    replicas: 1
+    extraEnv:
+      # Keep a little bit lower than memory limits
+      - name: GOMEMLIMIT
+        value: 5750MiB
+    persistence:
+      # -- Enable creating PVCs which is required when using recording rules
+      enabled: true
+      # -- Size of persistent disk
+      size: 1Gi
+      # -- Storage class to be used.
+      # If defined, storageClassName: <storageClass>.
+      # If set to "-", storageClassName: "", which disables dynamic provisioning.
+      # If empty or set to null, no storageClassName spec is
+      # set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack).
+      storageClass: ""
+  chunksCache:
+    # default is 500MB, with limited memory keep this smaller
+    writebackSizeLimit: 20MB
+
+  # Zero out replica counts of other deployment modes
+  backend:
+    replicas: 0
+  read:
+    replicas: 0
+  write:
+    replicas: 0
+
+  ingester:
+    replicas: 0
+  querier:
+    replicas: 0
+  queryFrontend:
+    replicas: 0
+  queryScheduler:
+    replicas: 0
+  distributor:
+    replicas: 0
+  compactor:
+    replicas: 0
+  indexGateway:
+    replicas: 0
+  bloomCompactor:
+    replicas: 0
+  bloomGateway:
+    replicas: 0
+
+  minio:
+    enabled: false
+  serviceAccount:
+    annotations:
+      iam.gke.io/gcp-service-account: 
+  
+  ruler:
+    # -- The ruler component is optional and can be disabled if desired.
+    enabled: false
+  sidecar:
+    enableUniqueFilenames: false
+    rules:
+      # -- Whether or not to create a sidecar to ingest rule from specific ConfigMaps and/or Secrets.
+      enabled: false
+      # -- Label that the configmaps/secrets with rules will be marked with.
+      label: loki_rule
+      # -- Label value that the configmaps/secrets with rules will be set to.
+      labelValue: "true"
+      # -- Folder into which the rules will be placed.
+      folder: /var/loki/rules/test
+      # -- Comma separated list of namespaces. If specified, the sidecar will search for config-maps/secrets inside these namespaces.
+      # Otherwise the namespace in which the sidecar is running will be used.
+      # It's also possible to specify 'ALL' to search in all namespaces.
+      searchNamespace: ALL
+  loki:
+    auth_enabled: false
+    commonConfig:
+      replication_factor: 1
+    storage:
+      type: "gcs"
+      gcs:
+        chunkBufferSize: 0
+        requestTimeout: "10s"
+        enableHttp2: true
+      bucketNames: 
+        chunks: suidex-loki-bucket
+    schemaConfig:
+      configs:
+        - from: "2024-12-10"
+          store: tsdb
+          object_store: gcs
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+    ingester:
+      chunk_encoding: snappy
+    tracing:
+      enabled: true
+    querier:
+      max_concurrent: 4
+    rulerConfig:
+      wal:
+        dir: /var/loki/ruler-wal
+      enable_alertmanager_v2: true
+      enable_api: true
+      enable_sharding: true
+      storage:
+        type: local
+        local:
+          directory: /var/loki/rules/
+      rule_path: /tmp/rules
+      alertmanager_url: http://prometheus-operator-kube-p-alertmanager.monitoring.svc.cluster.local:9093
+      remote_write:
+        enabled: true
+        client:
+          url: http://prometheus-operator-kube-p-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http-metrics
+    initialDelaySeconds: 45
+  livenessProbe:
+    httpGet:
+      path: /ready
+      port: http-metrics
+    initialDelaySeconds: 45
+
+promtail:
+  enabled: true
+  tolerations:
+    - effect: NoSchedule
+      operator: Exists
+    - effect: NoExecute
+      operator: Exists
+  config:
+    logLevel: info
+    serverPort: 3101
+    clients:
+      - url: http://{{ .Release.Name }}:3100/loki/api/v1/push
+

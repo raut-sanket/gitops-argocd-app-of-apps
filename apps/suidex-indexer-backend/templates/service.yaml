@@ -1,0 +1,18 @@
+{{- if and .Values.service (not .Values.rollout) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "app.name" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: {{ include "app.name" .  | trunc 15 }}
+    port: {{ default "80" .Values.service.port }}
+    protocol: TCP
+    targetPort: {{ .Values.service.containerPort }}
+  selector:
+    {{- include "app.selectorLabels" . | nindent 4 }}
+{{- end }}

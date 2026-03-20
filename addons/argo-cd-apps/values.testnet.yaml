@@ -1,0 +1,15 @@
+defaults:
+  env: staging-testnet
+  source:
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+        - values.yaml
+        - values.testnet.yaml
+
+apps:
+
+
+addons:
+  
+

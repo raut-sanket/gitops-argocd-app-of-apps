@@ -1,0 +1,19 @@
+{{- if .Values.service }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- toYaml .Values.statefulset.labels  | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: psql
+    port: {{ .Values.service.port }}
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    {{- toYaml .Values.statefulset.labels  | nindent 4 }}
+{{- end }}

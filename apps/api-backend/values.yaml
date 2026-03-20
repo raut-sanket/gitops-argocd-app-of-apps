@@ -1,0 +1,85 @@
+nameOverride: api-backend
+namespace: api-backend-prod
+
+
+# rollout:
+#   annotatelitmus: true
+
+service:
+  port: 80
+  containerPort: 3000
+
+image:
+  repository: us-east4-docker.pkg.dev/suidex/suidex/api-backend-prod
+  tag: 885ede94
+configs:
+  PORT: "3000"
+  ALLOW_ORIGIN: "*"
+  DATABASE_USERNAME: "suidex"
+  DATABASE_HOST: "10.125.0.12"
+  DATABASE_PORT: "5432"
+  DATABASE_TYPE: "postgres"
+  DATABASE_NAME: "suidex"
+  DATABASE_SCHEMA: "public"
+  DATABASE_SYNCHRONIZE: "true"
+  DATABASE_MAX_CONNECTIONS: "100"
+  DATABASE_SSL_ENABLED: "false"
+  DATABASE_REJECT_UNAUTHORIZED: "false"
+  NODE_ENV: "development"
+  NODE_OPTIONS: "--max_old_space_size=3072"
+  API_SERVICE_TOKEN: "thisIsTheTokenWhichGetsEncrypted"
+  SERVICE_ENCRYPTION_KEY: "seceretKeyForEventRelatedAPis_&%67$!_@"
+  PACKAGE_ID: "0xbfac5e1c6bf6ef29b12f7723857695fd2f4da9a11a7d88162c15e9124c243a4a"
+  # Victory Token Configuration
+  VICTORY_TOKEN_TYPE: "0xbfac5e1c6bf6ef29b12f7723857695fd2f4da9a11a7d88162c15e9124c243a4a::victory_token::VICTORY_TOKEN"
+  VICTORY_DECIMALS: "6"
+  SUI_TOKEN_TYPE: "0x2::sui::SUI"
+  # Sui Blockchain
+  SUI_RPC_URL: "https://fullnode.mainnet.sui.io:443"
+  FACTORY_ID: "0x81c286135713b4bf2e78c548f5643766b5913dcd27a8e76469f146ab811e922d"
+  # Price Configuration
+  PRICE_UPDATE_INTERVAL: "1000"
+  SUI_PRICE_CACHE_DURATION: "1000"
+  PRICE_RETENTION_DAYS: "30"
+  PRICE_RETRY_ATTEMPTS: "3"
+  PRICE_RETRY_DELAY: "5000"
+  # External APIs (optional)
+  COINGECKO_API_KEY: ""
+
+replicas: 1
+resources:
+  requests:
+    memory: 250Mi
+    cpu: 200m
+  limits:
+    memory: 500Mi
+    cpu: 500m
+# probes:
+#   livenessPath: /internal/alive
+#   readinessPath: /internal/ready
+#   liveness:
+#     initialDelaySeconds: 3
+#     periodSeconds: 3
+#   readiness:
+#     initialDelaySeconds: 5
+#     periodSeconds: 5
+
+
+# autoscaling:
+#   minReplicas: 1
+#   maxReplicas: 6
+#   targetCPUUtilizationPercentage: 70
+
+secrets:
+  secretStore: suidex-store
+  key: api-backend-prod
+  data:
+    - name: DATABASE_PASSWORD
+      property: dbpassword
+
+ingress:
+  enabled: true
+  host: api-backend.suidex.org
+
+prometheus: 
+  enabled: false

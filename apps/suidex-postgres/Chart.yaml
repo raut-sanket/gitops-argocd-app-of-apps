@@ -1,0 +1,4 @@
+apiVersion: v1
+name: suidex-postgres
+version: 0.0.1
+description: Chart containing postgres manifest

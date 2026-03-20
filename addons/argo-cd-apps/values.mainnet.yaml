@@ -1,0 +1,71 @@
+defaults:
+  env: mainnet
+  source:
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+        - values.yaml
+
+apps:
+  - name: dex-frontend
+    namespace: dex-frontend-prod
+    releaseName: dex-frontend
+    autosync: false
+  - name: suidex-frontend
+    namespace: suidex-frontend-prod
+    releaseName: suidex-frontend
+    autosync: 
+  - name: farm-suidex-frontend
+    namespace: farm-suidex-frontend
+    releaseName: farm-suidex-frontend
+    autosync: false
+  - name: presale-backend
+    namespace: presale-prod
+    releaseName: presale-backend
+    autosync: false
+  - name: presale-frontend
+    namespace: presale-prod
+    releaseName: presale-frontend
+    autosync: false
+  - name: redis
+    namespace: redis
+    autosync: false
+  - name: suidex-api-backend
+    namespace: suidex-api-backend
+    releaseName: suidex-api-backend
+    autosync: false
+  - name: suidex-indexer-backend
+    namespace: suidex-indexer-backend
+    releaseName: indexer-backend
+    autosync: false
+  - name: suidex-worker-backend
+    namespace: suidex-worker-backend
+    releaseName: worker-backend
+    autosync: false
+  - name: suidex-postgres
+    namespace: postgres
+    releaseName: postgres
+    autosync: false
+                                    
+addons:
+  - name: argo-cd-apps
+    namespace: argocd
+    autosync: true
+    valueFiles:
+      - values.yaml    
+      - values.mainnet.yaml
+  - name: external-secrets
+    namespace: external-secrets
+    releaseName: external-secret
+    autosync: false
+  - name: ingress-nginx
+    releaseName: ingress-nginx
+    namespace: ingress-nginx
+    autosync: false
+  - name: cert-manager
+    namespace: cert-manager
+    autosync: false
+  - name: cert-clusterissuer
+    source:
+      directory: true
+    autosync: false 

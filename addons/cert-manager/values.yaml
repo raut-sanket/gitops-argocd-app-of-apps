@@ -1,0 +1,39 @@
+cert-manager:
+  fullnameOverride: cert-manager
+  namespace: cert-manager
+  installCRDs: true
+
+  prometheus:
+    servicemonitor:
+      enabled: false
+
+  resources:
+    requests:
+      cpu: 5m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi
+
+  extraArgs:
+    - --logging-format=json
+  webhook:
+    extraArgs:
+      - --logging-format=json
+    resources:
+      requests:
+        cpu: 5m
+        memory: 16Mi
+      limits:
+        cpu: 50m
+        memory: 32Mi
+  cainjector:
+    extraArgs:
+      - --logging-format=json
+    resources:
+      requests:
+        cpu: 5m
+        memory: 48Mi
+      limits:
+        cpu: 50m
+        memory: 96Mi

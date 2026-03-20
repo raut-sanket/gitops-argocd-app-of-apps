@@ -1,0 +1,70 @@
+nameOverride: presale-backend
+namespace: presale-prod
+
+
+# rollout:
+#   annotatelitmus: true
+
+service:
+  port: 80
+  containerPort: 3001
+
+image:
+  repository: us-east4-docker.pkg.dev/suidex/suidex/presale-backend
+  tag: f838763c
+configs:
+  NODE_ENV: development
+  PORT: 3001
+  JWT_EXPIRES_IN: 7d
+  PRESALE_RATE: 250
+  HARD_CAP_USDC: 100000
+  SOFT_CAP_USDC: 15000
+  AIRDROP_PERCENTAGE: 25
+  STAKING_PERCENTAGE: 75
+  ADMIN_EMAIL: admin@suidex.com
+  FRONTEND_URL: https://presale.suidex.org/
+  SUI_NETWORK: mainnet
+
+replicas: 0
+resources:
+  requests:
+    memory: 250Mi
+    cpu: 200m
+  limits:
+    memory: 500Mi
+    cpu: 500m
+# probes:
+#   livenessPath: /internal/alive
+#   readinessPath: /internal/ready
+#   liveness:
+#     initialDelaySeconds: 3
+#     periodSeconds: 3
+#   readiness:
+#     initialDelaySeconds: 5
+#     periodSeconds: 5
+
+
+# autoscaling:
+#   minReplicas: 1
+#   maxReplicas: 6
+#   targetCPUUtilizationPercentage: 70
+
+secrets:
+  secretStore: suidex-store
+  key: presale-backend
+  data:
+    - name: MONGODB_URI
+      property: dbpassword
+    - name: ADMIN_PASSWORD
+      property: adminpass
+    - name: JWT_SECRET
+      property: jwtsecret
+
+
+ingress:
+  enabled: true
+  host: api.suidex.org
+
+prometheus: 
+  enabled: false
+

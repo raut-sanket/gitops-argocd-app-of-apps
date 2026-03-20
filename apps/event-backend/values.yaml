@@ -1,0 +1,59 @@
+nameOverride: event-backend
+namespace: event-backend-prod
+
+
+# rollout:
+#   annotatelitmus: true
+
+service:
+  port: 80
+  containerPort: 3012
+
+image:
+  repository: us-east4-docker.pkg.dev/suidex/suidex/event-backend-prod
+  tag: a3a45734
+configs:
+  PORT: "3012"
+  NODE_ENV: "development"
+  BACK_END_API_URL: "https://api-backend.suidex.org/v1"
+  API_SERVICE_TOKEN: "thisIsTheTokenWhichGetsEncrypted"
+  SERVICE_ENCRYPTION_KEY: "seceretKeyForEventRelatedAPis_&%67$!_@"
+  RPC_URL: "https://fullnode.mainnet.sui.io:443"
+
+replicas: 1
+resources:
+  requests:
+    memory: 250Mi
+    cpu: 200m
+  limits:
+    memory: 500Mi
+    cpu: 500m
+# probes:
+#   livenessPath: /internal/alive
+#   readinessPath: /internal/ready
+#   liveness:
+#     initialDelaySeconds: 3
+#     periodSeconds: 3
+#   readiness:
+#     initialDelaySeconds: 5
+#     periodSeconds: 5
+
+
+# autoscaling:
+#   minReplicas: 1
+#   maxReplicas: 6
+#   targetCPUUtilizationPercentage: 70
+
+# secrets:
+#   secretStore: suidex-store
+#   key: api-backend-prod
+#   data:
+#     - name: DATABASE_PASSWORD
+#       property: dbpassword
+
+ingress:
+  enabled: false
+  host: event-backend.suidex.org
+
+prometheus: 
+  enabled: false

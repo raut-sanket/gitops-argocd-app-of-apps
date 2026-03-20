@@ -1,0 +1,5 @@
+apiVersion: v2
+name: suidex-worker-backend
+version: 0.1.1
+type: application
+description: Chart containing base-chart service deployment manifests
